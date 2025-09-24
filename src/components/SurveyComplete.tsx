@@ -1,6 +1,10 @@
 import React from 'react';
 
-export default function SurveyComplete() {
+interface SurveyCompleteProps {
+  onBack?: () => void;
+}
+
+export default function SurveyComplete({ onBack }: SurveyCompleteProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full py-20">
       <div className="text-orange-500 text-3xl font-bold mb-4">Hoàn thành</div>
@@ -14,7 +18,12 @@ export default function SurveyComplete() {
         </span>
       </div>
       <div className="text-blue-600 text-lg font-semibold mb-6">Cảm ơn bạn đã tham gia khảo sát!</div>
-      <button className="bg-blue-500 text-white px-8 py-2 rounded-full font-semibold hover:bg-blue-600 transition">Trở về</button>
+      <button
+        className="bg-blue-500 text-white px-8 py-2 rounded-full font-semibold hover:bg-blue-600 transition"
+        onClick={onBack}
+      >
+        Trở về
+      </button>
     </div>
   );
 }
