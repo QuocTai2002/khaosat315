@@ -14,8 +14,7 @@ import SurveyQuestion from "../components/SurveyQuestion";
 // import SurveyTextQuestion from "../components/SurveyTextQuestion"; // Không dùng
 import SurveyComplete from "../components/SurveyComplete";
 import axios from "axios";
-// @ts-ignore
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 
 // const SURVEY_QUESTIONS = [...]; // Không dùng
 export default function Home() {
