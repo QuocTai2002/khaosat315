@@ -1,166 +1,145 @@
 "use client";
 
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useEffect, useState } from "react";
+// ...existing code...
 import LogoHeader from "../components/LogoHeader";
 import { User } from "lucide-react";
 import SearchInput from "../components/SearchInput";
-import ChildList from "../components/ChildList";
+// import ChildList from "../components/ChildList"; // Không dùng
 import CustomerInfo from "../components/CustomerInfo";
 import SurveySuggestion from "../components/SurveySuggestion";
 import SurveyCategory from "../components/SurveyCategory";
 import SurveyProgress from "../components/SurveyProgress";
 import SurveyQuestion from "../components/SurveyQuestion";
-import SurveyTextQuestion from "../components/SurveyTextQuestion";
+// import SurveyTextQuestion from "../components/SurveyTextQuestion"; // Không dùng
 import SurveyComplete from "../components/SurveyComplete";
+import axios from "axios";
+import { debounce } from "lodash";
 
-
-// Danh sách khách hàng mẫu (có thể mở rộng thêm trường nếu cần)
-const MOCK_CUSTOMERS = [
-  {
-    name: "Nguyễn Văn Minh",
-    code: "AB25000387",
-    gender: "Nam",
-    month: 2,
-    birthday: "01/01/2021",
-    address: "123 Đường ABC, Quận 1, TP.HCM",
-  },
-  {
-    name: "Nguyễn Thị Bình",
-    code: "AB25000388",
-    gender: "Nữ",
-    month: 4,
-    birthday: "01/03/2021",
-    address: "234 Đường DEF, Quận 2, TP.HCM",
-  },
-  {
-    name: "Nguyễn Hồng Linh",
-    code: "AB25000389",
-    gender: "Nữ",
-    month: 8,
-    birthday: "01/05/2021",
-    address: "345 Đường GHI, Quận 3, TP.HCM",
-  },
-  {
-    name: "Nguyễn Bằng",
-    code: "AB25000390",
-    gender: "Nam",
-    month: 10,
-    birthday: "01/07/2021",
-    address: "456 Đường JKL, Quận 4, TP.HCM",
-  },
-  {
-    name: "Nguyễn Duy Ninh",
-    code: "AB25000391",
-    gender: "Nam",
-    month: 12,
-    birthday: "01/09/2021",
-    address: "567 Đường MNO, Quận 5, TP.HCM",
-  },
-];
-
-const MOCK_CHILDREN = MOCK_CUSTOMERS.map((c) => c.name);
-
-
-const ALL_SURVEYS = [
-  { label: "Khảo sát 2 tháng", period: "0-2 tháng" },
-  { label: "Khảo sát 4 tháng", period: "2-4 tháng" },
-  { label: "Khảo sát 6 tháng", period: "5 tháng 0 ngày đến 6 tháng 30 ngày" },
-  { label: "Khảo sát 8 tháng", period: "6-8 tháng" },
-  { label: "Khảo sát 10 tháng", period: "8-10 tháng" },
-  { label: "Khảo sát 12 tháng", period: "10-12 tháng" },
-  { label: "Khảo sát 15 tháng", period: "12-15 tháng" },
-  { label: "Khảo sát 18 tháng", period: "15-18 tháng" },
-  { label: "Khảo sát 24 tháng", period: "18-24 tháng" },
-  { label: "Khảo sát 36 tháng", period: "24-36 tháng" },
-  { label: "Khảo sát 48 tháng", period: "36-48 tháng" },
-  { label: "Khảo sát 60 tháng", period: "48-60 tháng" },
-];
-
-const SUGGESTED_SURVEY = ALL_SURVEYS[2];
-
-const CATEGORIES = [
-  { label: "2 tháng", color: "bg-blue-100 text-blue-700" },
-  { label: "4 tháng", color: "bg-green-100 text-green-700" },
-  { label: "8 tháng", color: "bg-orange-100 text-orange-700" },
-  { label: "10 tháng", color: "bg-purple-100 text-purple-700" },
-  { label: "+12 khảo sát", color: "bg-gray-100 text-gray-700" },
-];
-
-const SURVEY_QUESTIONS = [
-  {
-    type: "choice",
-    title: "Giao tiếp",
-    question:
-      "Khi phát ra âm thanh, con của bạn có tạo nên những tiếng ư ư, gừ gừ hoặc những âm thanh nhỏ nhỏ khác không?",
-    options: ["Có", "Thỉnh thoảng", "Chưa"],
-  },
-  {
-    type: "text",
-    title: "Câu hỏi chung",
-    question:
-      "Bên gia đình cha hoặc mẹ có ai bị điếc, nghe kém hoặc vấn đề về nhìn/thị giác không? Nếu có, vui lòng giải thích:",
-  },
-];
-
+// const SURVEY_QUESTIONS = [...]; // Không dùng
 export default function Home() {
   const [step, setStep] = useState(0); // 0: search, 1: select, 2: info, 3: survey, 4: complete
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
-  const selectedCustomer = React.useMemo(() =>
-    MOCK_CUSTOMERS.find((c) => c.name === selected) || null,
-    [selected]
-  );
-  const [answers, setAnswers] = useState<string[]>([]);
-  const [surveyIdx, setSurveyIdx] = useState(0);
-  const filtered = React.useMemo(
-    () =>
-      search
-        ? MOCK_CHILDREN.filter((n) =>
-            n.toLowerCase().includes(search.toLowerCase())
-          )
-        : [],
-    [search]
-  );
-  // Modal khảo sát
-  const [surveyModalOpen, setSurveyModalOpen] = useState(false);
-  const [surveySearch, setSurveySearch] = useState("");
-  const [selectedSurvey, setSelectedSurvey] = useState(SUGGESTED_SURVEY);
-  const filteredSurveys = React.useMemo(
-    () =>
-      ALL_SURVEYS.filter((s) =>
-        s.label.toLowerCase().includes(surveySearch.toLowerCase())
-      ),
-    [surveySearch]
-  );
+  const [questions, setQuestions] = useState<
+    Array<{
+      idcauhoi: number; // id câu hỏi
+      anh?: string; // url hình ảnh nếu có
+      noidung: string;
+      dapans: Array<{
+        cauhoi: string;
+        diem: number;
+        iddapan: number;
+        noidung: string;
+        sudung: boolean;
+      }>;
+      linhvuc: number;
+    }>
+  >([]);
+  const [customers, setCustomers] = useState<
+    Array<{
+      idbn: number;
+      mabenhnhan: string;
+      gioitinh: string;
+      ngaysinh: string;
+      diachi: string;
+      tenbenhnhan: string;
+    }>
+  >([]);
+  const [infoCustomer, setInfoCustomer] = useState<{
+    idbn: number;
+    mabenhnhan: string;
+    gioitinh: string;
+    ngaysinh: string;
+    diachi: string;
+    tenbenhnhan: string;
+  } | null>(null);
+  // category
+  const [category, setCategory] = useState<
+    Array<{
+      iddanhmuc: number;
+      thangtuoi: string;
+      tendanhmuc: string;
+    }>
+  >([]);
+  const [selected, setSelected] = useState<
+    | {
+        iddanhmuc: number;
+        thangtuoi: string;
+        tendanhmuc: string;
+      }[]
+    | null
+  >(null);
 
-  // Reset về bước 0 nếu đang ở bước 2 mà không còn khách hàng phù hợp
-  React.useEffect(() => {
-    if (step === 2 && (!search.trim() || !filtered.includes(selected || ""))) {
-      setStep(0);
-      setSelected(null);
-    }
-  }, [search, filtered, step, selected]);
+  const [answers, setAnswers] = useState<(number | string)[]>([]);
+  const [surveyIdx, setSurveyIdx] = useState(0);
+  const [selectedSurvey, setSelectedSurvey] = useState<
+    | {
+        iddanhmuc: number;
+        thangtuoi: string;
+        tendanhmuc: string;
+      }
+    | undefined
+  >(undefined);
 
   // Handlers
-  const handleSelect = (name: string) => {
-    setSelected(name);
+  const handleSelect = (info: {
+    idbn: number;
+    mabenhnhan: string;
+    gioitinh: string;
+    ngaysinh: string;
+    diachi: string;
+    tenbenhnhan: string;
+  }) => {
+    setInfoCustomer(info);
     setStep(2);
   };
   const handleStartSurvey = () => {
+    fetchSurveysByCategory(selectedSurvey?.iddanhmuc || 0);
     setStep(3);
     setSurveyIdx(0);
     setAnswers([]);
   };
-  const handleAnswer = (value: string) => {
+  const handleAnswer = (value: number) => {
     const newAnswers = [...answers];
     newAnswers[surveyIdx] = value;
+    console.log(newAnswers);
+    
     setAnswers(newAnswers);
   };
+
+  console.log(questions);
+  
+  const sendSurveyResult = async () => {
+    // Build payload đúng format
+    const now = new Date().toISOString();
+    const phieuKhaoSatTraLois = questions.map((q, idx) => {
+      const answer = answers[idx];
+      return {
+        idphieutraloi: 0,
+        idphieu: 0,
+        idcauhoi: q.idcauhoi || 0, // lấy idcauhoi tương ứng
+        iddapan: typeof answer === "number" ? answer : 0,
+        giaithich: ""
+      };
+    });
+    const payload = {
+      idphieu: 0,
+      idbenhnhan: infoCustomer?.idbn || 0,
+      iddanhmuc: selectedSurvey?.iddanhmuc || 0,
+      ngaytao: now,
+      phieuKhaoSatTraLois
+    };
+    try {
+      await axios.post("https://api2.315healthcare.com/api/PhieuKhaoSat", payload);
+    } catch (error) {
+      console.log("Gửi khảo sát lỗi", error);
+    }
+  };
+
   const handleNext = () => {
-    if (surveyIdx < SURVEY_QUESTIONS.length - 1) {
+    if (Array.isArray(questions) && surveyIdx < questions.length - 1) {
       setSurveyIdx(surveyIdx + 1);
     } else {
+      sendSurveyResult();
       setStep(4);
     }
   };
@@ -173,20 +152,60 @@ export default function Home() {
     }
   };
 
+  const searchCustomers = debounce(async (query: string) => {
+    try {
+      const { data } = await axios.get(
+        `https://api2.315healthcare.com/api/BenhNhan/SearchBenhNhanByCT?keyword=${query}`
+      );
+      setCustomers(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }, 300);
+
+  // call api category
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get(
+        `https://api2.315healthcare.com/api/DanhMucKhaoSat`
+      );
+      setCategory(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // lấy danh sách khảo sát theo iddanhmuc
+  const fetchSurveysByCategory = async (iddanhmuc: number) => {
+    try {
+      const { data } = await axios.get(
+        `https://api2.315healthcare.com/api/CauHoiKhaoSat/GetByCondition?idDanhMuc=${iddanhmuc}`
+      );
+      setQuestions(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchCategories();
+  }, []);
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-2 py-4 md:py-8">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-0 md:p-4 min-h-[600px] flex flex-col">
+    <div className="min-w-screen bg-gray-50 flex items-center justify-center">
+      <div
+        className="w-[800px]  bg-white rounded-2xl shadow-lg p-0 md:p-4 flex flex-col mx-auto my-auto"
+        style={{ minHeight: "unset", minWidth: "unset" }}
+      >
         <LogoHeader />
         {step === 0 && (
           <>
-            <SearchInput value={search} onChange={setSearch} />
-            {filtered.length > 0 ? (
+            <SearchInput onChange={searchCustomers} />
+            {customers.length > 0 ? (
               <div className="mt-4 space-y-4 max-h-[500px] min-h-[500px] overflow-y-auto">
-                {filtered.map((name) => (
+                {customers.map((customer) => (
                   <div
-                    key={name}
+                    key={customer?.idbn}
                     className="cursor-pointer p-2 border rounded-lg shadow-sm hover:shadow-md transition-shadow bg-white flex items-center gap-2"
-                    onClick={() => handleSelect(name)}
+                    onClick={() => handleSelect(customer)}
                   >
                     <div className="flex-shrink-0">
                       <div className="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center">
@@ -195,31 +214,25 @@ export default function Home() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-base text-gray-800 truncate">
-                        {name}
+                        {customer?.tenbenhnhan}
                       </div>
-                      {(() => {
-                        const customer = MOCK_CUSTOMERS.find((c) => c.name === name);
-                        return customer ? (
-                          <>
-                            <div className="text-xs text-gray-500 flex flex-wrap gap-x-2 justify-between w-full">
-                              <span>
-                                <span className="font-medium">Mã KH:</span> {customer.code}
-                              </span>
-                              <span>
-                                <span className="font-medium">Tuổi:</span> {customer.month} tháng
-                              </span>
-                              <span>
-                                <span className="font-medium">Ngày sinh:</span> {customer.birthday}
-                              </span>
-                            </div>
-                            <div className="text-xs text-gray-500 flex flex-wrap gap-x-4 mt-1">
-                              <span className="truncate">
-                                <span className="font-medium">Địa chỉ:</span> {customer.address}
-                              </span>
-                            </div>
-                          </>
-                        ) : null;
-                      })()}
+                      <div className="text-xs text-gray-500 flex flex-wrap gap-x-2 justify-between w-full">
+                        <span>
+                          <span className="font-medium">Mã KH:</span>{" "}
+                          {customer.mabenhnhan}
+                        </span>
+
+                        <span>
+                          <span className="font-medium">Ngày sinh:</span>{" "}
+                          {customer.ngaysinh}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 flex flex-wrap gap-x-4 mt-1">
+                        <span className="truncate">
+                          <span className="font-medium">Địa chỉ:</span>{" "}
+                          {customer.diachi}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -231,81 +244,56 @@ export default function Home() {
             )}
           </>
         )}
-        {step === 1 && (
+        {step === 2 && infoCustomer && (
           <>
-            <SearchInput value={search} onChange={setSearch} />
-            <ChildList
-              childrenNames={filtered}
-              onSelect={handleSelect}
-              selectedName={selected}
-            />
-            {filtered.length === 0 ? (
-              <div className="text-center text-gray-400 mt-8">
-                Không tìm thấy kết quả phù hợp.
-              </div>
-            ) : null}
-          </>
-        )}
-        {step === 2 && selectedCustomer && (
-          <>
-            <SearchInput value={search} onChange={setSearch} />
-            <CustomerInfo {...selectedCustomer} />
+            <CustomerInfo {...infoCustomer} />
             <div className="text-center text-gray-400 mb-2 text-sm">
               Tìm thấy 1 khách hàng
             </div>
-            <SurveySuggestion {...selectedSurvey} />
+            {selectedSurvey && (
+              <SurveySuggestion
+                iddanhmuc={selectedSurvey.iddanhmuc}
+                thangtuoi={selectedSurvey.thangtuoi}
+                tendanhmuc={selectedSurvey.tendanhmuc}
+              />
+            )}
             <div className="text-center font-semibold mb-2">
               Bạn đã sẵn sàng chưa?
             </div>
-            <button
-              className="bg-blue-500 text-white rounded-full px-8 py-2 font-semibold mx-auto mb-4"
-              onClick={handleStartSurvey}
-            >
-              Bắt đầu
-            </button>
+            <div className="flex items-center justify-center">
+              <div className="flex gap-4 items-center justify-around">
+                <button
+                  className="text-blue-500 border border-blue-500 cursor-pointer rounded-full px-8 py-2 font-semibold mx-auto mb-4"
+                  onClick={() => {
+                    setStep(0);
+                    setInfoCustomer(null);
+                  }}
+                >
+                  Quay lại
+                </button>
+                <button
+                  disabled={!selectedSurvey}
+                  className="bg-blue-500 cursor-pointer text-white rounded-full px-8 py-2 font-semibold mx-auto mb-4"
+                  onClick={handleStartSurvey}
+                >
+                  Bắt đầu
+                </button>
+              </div>
+            </div>
+
             <SurveyCategory
-              categories={CATEGORIES}
-              onSelect={(cat: { label: string }) => {
-                if (cat.label === "+12 khảo sát") setSurveyModalOpen(true);
-                else {
-                  const found = ALL_SURVEYS.find((s) => s.label.includes(cat.label));
-                  if (found) setSelectedSurvey(found);
-                }
-              }}
+              categories={category}
+              onSelect={(value) => setSelectedSurvey(value)}
+              // onSelect={(cat: { label: string }) => {
+              //   if (cat.label === "+12 khảo sát") setSurveyModalOpen(true);
+              //   else {
+              //     const found = ALL_SURVEYS.find((s) =>
+              //       s.label.includes(cat.label)
+              //     );
+              //     if (found) setSelectedSurvey(found);
+              //   }
+              // }}
             />
-            {/* Modal chọn khảo sát */}
-            <Dialog open={surveyModalOpen} onOpenChange={setSurveyModalOpen}>
-              <DialogContent className="max-w-md w-full">
-                <DialogHeader>
-                  <DialogTitle>Chọn khảo sát</DialogTitle>
-                </DialogHeader>
-                <input
-                  className="w-full border rounded px-2 py-1 mb-2"
-                  placeholder="Tìm kiếm khảo sát..."
-                  value={surveySearch}
-                  onChange={e => setSurveySearch(e.target.value)}
-                  autoFocus
-                />
-                <div className="max-h-60 overflow-y-auto space-y-2">
-                  {filteredSurveys.length === 0 && (
-                    <div className="text-gray-400 text-sm text-center">Không có khảo sát phù hợp</div>
-                  )}
-                  {filteredSurveys.map((survey) => (
-                    <div
-                      key={survey.label}
-                      className={`p-2 rounded cursor-pointer border hover:bg-blue-50 ${selectedSurvey.label === survey.label ? "border-blue-500 bg-blue-100" : "border-gray-200"}`}
-                      onClick={() => {
-                        setSelectedSurvey(survey);
-                        setSurveyModalOpen(false);
-                      }}
-                    >
-                      <div className="font-semibold">{survey.label}</div>
-                      <div className="text-xs text-gray-500">{survey.period}</div>
-                    </div>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
           </>
         )}
         {step === 3 && (
@@ -316,40 +304,38 @@ export default function Home() {
               </button>
               <SurveyProgress
                 current={surveyIdx + 1}
-                total={SURVEY_QUESTIONS.length}
-                title={SURVEY_QUESTIONS[surveyIdx].title}
+                total={Array.isArray(questions) ? questions.length : 0}
+                title={questions[surveyIdx]?.linhvuc?.toString() || ""}
               />
               <button className="text-blue-500 text-sm" onClick={handleNext}>
                 Tiếp theo
               </button>
             </div>
-            {SURVEY_QUESTIONS[surveyIdx].type === "choice" ? (
-              <SurveyQuestion
-                question={SURVEY_QUESTIONS[surveyIdx].question}
-                options={SURVEY_QUESTIONS[surveyIdx].options ?? []}
-                value={answers[surveyIdx] || ""}
-                onChange={handleAnswer}
-              />
-            ) : (
-              <SurveyTextQuestion
-                question={SURVEY_QUESTIONS[surveyIdx].question}
-                value={answers[surveyIdx] || ""}
-                onChange={handleAnswer}
-              />
-            )}
+            <SurveyQuestion
+              question={questions[surveyIdx]?.noidung || ""}
+              img={questions[surveyIdx]?.anh || ""}
+              options={questions[surveyIdx]?.dapans || []}
+              value={answers[surveyIdx] || ""}
+              onChange={handleAnswer}
+            />
             <button
               className="bg-blue-500 text-white rounded-full px-8 py-2 font-semibold mx-auto mt-4"
               onClick={handleNext}
             >
-              Tiếp tục
+              {surveyIdx === questions.length - 1 ? "Hoàn thành & Nộp bài" : "Tiếp tục"}
             </button>
           </>
         )}
         {step === 4 && (
-          <SurveyComplete onBack={() => {
-            setStep(0);
-            setSelected(null);
-          }} />
+          <>
+            <SurveyComplete
+              onBack={() => {
+                setStep(0);
+                setSelectedSurvey(undefined);
+                setInfoCustomer(null);
+              }}
+            />
+          </>
         )}
       </div>
     </div>
