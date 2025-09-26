@@ -14,6 +14,7 @@ import SurveyQuestion from "../components/SurveyQuestion";
 // import SurveyTextQuestion from "../components/SurveyTextQuestion"; // Không dùng
 import SurveyComplete from "../components/SurveyComplete";
 import axios from "axios";
+// @ts-ignore
 import { debounce } from "lodash";
 
 // const SURVEY_QUESTIONS = [...]; // Không dùng
@@ -60,14 +61,7 @@ export default function Home() {
       tendanhmuc: string;
     }>
   >([]);
-  const [selected, setSelected] = useState<
-    | {
-        iddanhmuc: number;
-        thangtuoi: string;
-        tendanhmuc: string;
-      }[]
-    | null
-  >(null);
+  // Đã bỏ biến selected không dùng
 
   const [answers, setAnswers] = useState<(number | string)[]>([]);
   const [surveyIdx, setSurveyIdx] = useState(0);
@@ -148,7 +142,7 @@ export default function Home() {
       setSurveyIdx(surveyIdx - 1);
     } else {
       setStep(0);
-      setSelected(null);
+  // setSelected(null); // Đã bỏ biến selected
     }
   };
 
@@ -315,7 +309,7 @@ export default function Home() {
               question={questions[surveyIdx]?.noidung || ""}
               img={questions[surveyIdx]?.anh || ""}
               options={questions[surveyIdx]?.dapans || []}
-              value={answers[surveyIdx] || ""}
+              value={String(answers[surveyIdx] ?? "")}
               onChange={handleAnswer}
             />
             <button
