@@ -107,15 +107,15 @@ export default function Home() {
     const phieuKhaoSatTraLois = questions.map((q, idx) => {
       const answer = answers[idx];
       return {
-        idphieutraloi: 0,
-        idphieu: 0,
+        // idphieutraloi: 0,
+        // idphieu: 0,
         idcauhoi: q.idcauhoi || 0, // lấy idcauhoi tương ứng
         iddapan: typeof answer === "number" ? answer : 0,
         giaithich: ""
       };
     });
     const payload = {
-      idphieu: 0,
+      // idphieu: 0,
       idbenhnhan: infoCustomer?.idbn || 0,
       iddanhmuc: selectedSurvey?.iddanhmuc || 0,
       ngaytao: now,
