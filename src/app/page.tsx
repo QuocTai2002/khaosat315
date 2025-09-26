@@ -109,15 +109,15 @@ export default function Home() {
       return {
         // idphieutraloi: 0,
         // idphieu: 0,
-        idcauhoi: q.idcauhoi || 0, // lấy idcauhoi tương ứng
-        iddapan: typeof answer === "number" ? answer : 0,
+        idcauhoi: q.idcauhoi || null, // lấy idcauhoi tương ứng
+        iddapan: typeof answer === "number" ? answer : null,
         giaithich: ""
       };
     });
     const payload = {
       // idphieu: 0,
       idbenhnhan: infoCustomer?.idbn || 0,
-      iddanhmuc: selectedSurvey?.iddanhmuc || 0,
+      iddanhmuc: selectedSurvey?.iddanhmuc || null,
       ngaytao: now,
       phieuKhaoSatTraLois
     };
