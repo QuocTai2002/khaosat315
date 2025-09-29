@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Image from "next/image";
 
 interface SurveyQuestionProps {
   question: string;
@@ -39,9 +40,11 @@ export default function SurveyQuestion({
   return (
     <div className="flex flex-col items-center gap-4 mb-4">
       {img && (
-        <img
+        <Image
           src={img}
           alt="Câu hỏi hình ảnh"
+          width={128}
+          height={128}
           className="mb-2 w-32 h-32 object-contain"
         />
       )}

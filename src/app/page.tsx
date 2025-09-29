@@ -184,7 +184,7 @@ export default function Home() {
     if (infoBranch) {
       searchCustomers(infoBranch);
     }
-  }, [infoBranch]);
+  }, [infoBranch, searchCustomers]);
   return (
     <div className="min-w-screen bg-gray-50 flex items-center justify-center">
       <div
