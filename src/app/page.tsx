@@ -35,7 +35,10 @@ interface infoCustomer {
 // const SURVEY_QUESTIONS = [...]; // Không dùng
 
 export default function Home() {
-  const branchID = localStorage.getItem("branchId");
+  let branchID: string | null = null;
+  if (typeof window !== "undefined") {
+    branchID = localStorage.getItem("branchId");
+  }
   const [step, setStep] = useState(0); // 0: search, 1: select, 2: info, 3: survey, 4: complete
   const [branchList, setBranchList] = useState<branchList[]>([]);
   const [explanations, setExplanations] = useState<string[]>([]);
@@ -200,7 +203,9 @@ export default function Home() {
                 showSearch
                 value={infoBranch}
                 onChange={(value) => {
-                  localStorage.setItem("branchId", String(value));
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem("branchId", String(value));
+                  }
                   setInfoBranch(value);
                 }}
                 options={branchList?.map((item) => ({
