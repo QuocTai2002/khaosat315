@@ -122,6 +122,7 @@ export default function Home() {
       ngaytao: now,
       thuchien: true,
       idchinhanh: infoBranch || 0,
+      idnguoichidinh: infoCustomer?.idnguoichidinh || 0,
       phieuKhaoSatTraLois,
     };
     try {
