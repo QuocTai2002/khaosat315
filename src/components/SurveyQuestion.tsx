@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface SurveyQuestionProps {
   question: string;
+  giaithich?: boolean;
   img?: string; // url hình ảnh nếu có
   options: Array<{
     cauhoi: string;
@@ -12,17 +13,29 @@ interface SurveyQuestionProps {
   }>;
   value: string;
   onChange: (v: number) => void;
+  onExplanationChange?: (explanation: string) => void;
 }
 
 export default function SurveyQuestion({
   question,
   img,
+  giaithich,
   options,
   value,
   onChange,
+  onExplanationChange,
 }: SurveyQuestionProps) {
+  const [explanation, setExplanation] = useState<string>("");
   // Tìm hình ảnh đầu tiên trong options (nếu có)
-
+  const handleExplanationChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const newExplanation = e.target.value;
+    setExplanation(newExplanation);
+    if (onExplanationChange) {
+      onExplanationChange(newExplanation);
+    }
+  };
   return (
     <div className="flex flex-col items-center gap-4 mb-4">
       {img && (
@@ -57,6 +70,24 @@ export default function SurveyQuestion({
           </label>
         ))}
       </div>
+      {giaithich && (
+        <div className="w-full max-w-xs mt-3">
+          <label
+            htmlFor="explanation"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Giải thích câu trả lời của bạn:
+          </label>
+          <textarea
+            id="explanation"
+            value={explanation}
+            onChange={handleExplanationChange}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            rows={3}
+            placeholder="Nhập giải thích cho câu trả lời của bạn..."
+          />
+        </div>
+      )}
     </div>
   );
 }
