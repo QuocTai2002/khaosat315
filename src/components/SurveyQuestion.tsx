@@ -4,6 +4,7 @@ import Image from "next/image";
 interface SurveyQuestionProps {
   question: string;
   giaithich?: boolean;
+  note?: string;
   img?: string; // url hình ảnh nếu có
   options: Array<{
     cauhoi: string;
@@ -21,21 +22,18 @@ export default function SurveyQuestion({
   question,
   img,
   giaithich,
+  note,
   options,
   value,
   onChange,
   onExplanationChange,
 }: SurveyQuestionProps) {
-  const [explanation, setExplanation] = useState<string>("");
   // Tìm hình ảnh đầu tiên trong options (nếu có)
   const handleExplanationChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const newExplanation = e.target.value;
-    setExplanation(newExplanation);
-    if (onExplanationChange) {
-      onExplanationChange(newExplanation);
-    }
+    onExplanationChange?.(newExplanation);
   };
   return (
     <div className="flex flex-col items-center gap-4 mb-4">
@@ -83,7 +81,7 @@ export default function SurveyQuestion({
           </label>
           <textarea
             id="explanation"
-            value={explanation}
+            value={note}
             onChange={handleExplanationChange}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             rows={3}

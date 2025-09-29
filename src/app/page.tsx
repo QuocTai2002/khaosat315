@@ -51,6 +51,7 @@ export default function Home() {
       anh?: string; // url hình ảnh nếu có
       noidung: string;
       giaithich?: boolean;
+      note?: string;
       dapans: Array<{
         cauhoi: string;
         diem: number;
@@ -64,17 +65,8 @@ export default function Home() {
   const [customers, setCustomers] = useState<Array<infoCustomer>>([]);
   const [infoCustomer, setInfoCustomer] = useState<infoCustomer | null>(null);
   // Đã bỏ biến selected không dùng
-
   const [answers, setAnswers] = useState<(number | string)[]>([]);
   const [surveyIdx, setSurveyIdx] = useState(0);
-  const [selectedSurvey, setSelectedSurvey] = useState<
-    | {
-        iddanhmuc: number;
-        thangtuoi: string;
-        tendanhmuc: string;
-      }
-    | undefined
-  >(undefined);
 
   // Handlers
   const handleSelect = (info: infoCustomer) => {
@@ -120,14 +112,16 @@ export default function Home() {
         idphieu: infoCustomer?.idphieu || 0,
         idcauhoi: q.idcauhoi || null, // lấy idcauhoi tương ứng
         iddapan: typeof answer === "number" ? answer : null,
-        iaithich: explanations[idx] || "",
+        giaithich: explanations[idx] || "",
       };
     });
     const payload = {
-      // idphieu: 0,
+      idphieu: infoCustomer?.idphieu || 0,
       idbenhnhan: infoCustomer?.idbenhnhan || 0,
-      iddanhmuc: selectedSurvey?.iddanhmuc || null,
+      iddanhmuc: infoCustomer?.iddanhmuc || null,
       ngaytao: now,
+      thuchien: true,
+      idchinhanh: infoBranch || 0,
       phieuKhaoSatTraLois,
     };
     try {
@@ -187,7 +181,7 @@ export default function Home() {
     if (infoBranch) {
       searchCustomers(infoBranch);
     }
-  }, [infoBranch, searchCustomers]);
+  }, [infoBranch]);
   return (
     <div className="min-w-screen bg-gray-50 flex items-center justify-center">
       <div
@@ -369,6 +363,7 @@ export default function Home() {
               img={questions[surveyIdx]?.anh || ""}
               options={questions[surveyIdx]?.dapans || []}
               value={String(answers[surveyIdx] ?? "")}
+              note={explanations[surveyIdx] ?? ""}
               onChange={handleAnswer}
               onExplanationChange={handleExplanationChange}
             />
@@ -387,7 +382,6 @@ export default function Home() {
             <SurveyComplete
               onBack={() => {
                 setStep(0);
-                setSelectedSurvey(undefined);
                 setInfoCustomer(null);
               }}
             />
