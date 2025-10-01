@@ -11,7 +11,9 @@ import SurveyQuestion from "../components/SurveyQuestion";
 import SurveyComplete from "../components/SurveyComplete";
 import axios from "axios";
 import debounce from "lodash/debounce";
-import { Button, Select } from "antd";
+import { Button, Select, Tooltip } from "antd";
+import { CopyOutlined, QrcodeOutlined } from "@ant-design/icons";
+import SurveyQRCodeModal from "../components/SurveyQRCodeModal";
 import dayjs from "dayjs";
 
 interface branchList {
@@ -67,6 +69,13 @@ export default function Home() {
   // Đã bỏ biến selected không dùng
   const [answers, setAnswers] = useState<(number | string)[]>([]);
   const [surveyIdx, setSurveyIdx] = useState(0);
+  // New: keyword state for searching
+  const [keyword, setKeyword] = useState("");
+  // QR modal state
+  const [qrModal, setQrModal] = useState<{ visible: boolean; url: string }>({
+    visible: false,
+    url: "",
+  });
 
   // Handlers
   const handleSelect = (info: infoCustomer) => {
@@ -152,11 +161,14 @@ export default function Home() {
     }
   };
 
-  const searchCustomers = debounce(async (query: number) => {
+  // Update: searchCustomers now accepts branch and keyword
+  const searchCustomers = debounce(async (branch: number, keyword: string) => {
     try {
-      const { data } = await axios.get(
-        `https://api2.315healthcare.com/api/PhieuKhaoSat/BenhNhanChoKhaoSat?idChiNhanh=${query}`
-      );
+      let url = `https://api2.315healthcare.com/api/PhieuKhaoSat/BenhNhanChoKhaoSat?idChiNhanh=${branch}`;
+      if (keyword && keyword.trim() !== "") {
+        url += `&keyword=${encodeURIComponent(keyword.trim())}`;
+      }
+      const { data } = await axios.get(url);
       setCustomers(data);
     } catch (error) {
       console.log(error);
@@ -180,9 +192,10 @@ export default function Home() {
 
   useEffect(() => {
     if (infoBranch) {
-      searchCustomers(infoBranch);
+      searchCustomers(infoBranch, keyword);
     }
-  }, [infoBranch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [infoBranch, keyword]);
   return (
     <div className="min-w-screen bg-gray-50 flex items-center justify-center">
       <div
@@ -192,88 +205,131 @@ export default function Home() {
         <LogoHeader />
         {step === 0 && (
           <>
-            <div className="flex justify-center gap-2 ">
-              <Select
-                size="large"
-                showSearch
-                value={infoBranch}
-                onChange={(value) => {
-                  if (typeof window !== "undefined") {
-                    localStorage.setItem("branchId", String(value));
+            <div className="flex flex-col gap-4 items-center justify-center">
+              <div className="flex justify-center gap-2 w-full">
+                <Select
+                  size="large"
+                  showSearch
+                  value={infoBranch}
+                  onChange={(value) => {
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("branchId", String(value));
+                    }
+                    setInfoBranch(value);
+                  }}
+                  options={branchList?.map((item) => ({
+                    label: item.tenchinhanh,
+                    value: item.idchinhanh,
+                  }))}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
                   }
-                  setInfoBranch(value);
-                }}
-                options={branchList?.map((item) => ({
-                  label: item.tenchinhanh,
-                  value: item.idchinhanh,
-                }))}
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                placeholder="Tìm kiếm chi nhánh"
-                className="w-96"
+                  placeholder="Tìm kiếm chi nhánh"
+                  className="w-96"
+                />
+                <Button
+                  size="large"
+                  type="primary"
+                  onClick={() => {
+                    if (infoBranch !== null) {
+                      searchCustomers(infoBranch, keyword);
+                    }
+                  }}
+                >
+                  Tìm
+                </Button>
+              </div>
+              <input
+                type="text"
+                className="w-96 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập họ tên hoặc từ khóa tìm kiếm khách hàng..."
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
               />
-              <Button
-                size="large"
-                type="primary"
-                onClick={() => {
-                  if (infoBranch !== null) {
-                    searchCustomers(infoBranch);
-                  }
-                }}
-              >
-                Tìm
-              </Button>
             </div>
 
-            {/* <SearchInput onChange={searchCustomers} /> */}
             {customers.length > 0 ? (
               <div className="mt-4 space-y-4 max-h-[500px] min-h-[500px] overflow-y-auto">
-                {customers.map((customer) => (
-                  <div
-                    key={customer?.idphieu}
-                    className="cursor-pointer p-2 border rounded-lg shadow-sm hover:shadow-md transition-shadow bg-white flex items-center gap-2"
-                    onClick={() => handleSelect(customer)}
-                  >
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center">
-                        <User className="w-4 h-4" />
+                {customers.map((customer) => {
+                  const surveyUrl = `${
+                    typeof window !== "undefined" ? window.location.origin : ""
+                  }/survey/${customer.idphieu}`;
+                  return (
+                    <div
+                      key={customer?.idphieu}
+                      className="group relative p-2 border rounded-lg shadow-sm hover:shadow-md transition-shadow bg-white flex items-center gap-2 flex-wrap md:flex-nowrap"
+                    >
+                      <div
+                        className="flex-shrink-0 cursor-pointer"
+                        onClick={() => handleSelect(customer)}
+                      >
+                        <div className="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center">
+                          <User className="w-4 h-4" />
+                        </div>
+                      </div>
+                      <div
+                        className="flex-1 min-w-0 cursor-pointer"
+                        onClick={() => handleSelect(customer)}
+                      >
+                        <div className="font-semibold text-base text-gray-800 truncate">
+                          {customer?.tenbenhnhan}
+                        </div>
+                        <div className="text-gray-500 flex flex-wrap gap-x-2 justify-between w-full">
+                          <span>
+                            <span className="font-medium"> Ngày tạo:</span>{" "}
+                            {dayjs(customer.ngaytao).format(
+                              "DD/MM/YYYY HH:mm:ss"
+                            )}
+                          </span>
+                          <span>
+                            <span className="font-medium">Người tạo:</span>{" "}
+                            {customer.nguoichidinh}
+                          </span>
+                        </div>
+                        <div className=" text-gray-500 flex flex-wrap gap-x-4 mt-1">
+                          <span className="truncate">
+                            <span className="font-medium">Loại khảo sát:</span>{" "}
+                            {customer.tendanhmuc}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 items-center ml-auto mt-2 md:mt-0">
+                        <Tooltip title="Sao chép link khảo sát">
+                          <Button
+                            icon={<CopyOutlined />}
+                            size="small"
+                            onClick={() =>
+                              navigator.clipboard.writeText(surveyUrl)
+                            }
+                          />
+                        </Tooltip>
+                        <Tooltip title="Mã QR khảo sát">
+                          <Button
+                            icon={<QrcodeOutlined />}
+                            size="small"
+                            onClick={() =>
+                              setQrModal({ visible: true, url: surveyUrl })
+                            }
+                          />
+                        </Tooltip>
                       </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-base text-gray-800 truncate">
-                        {customer?.tenbenhnhan}
-                      </div>
-                      <div className="text-gray-500 flex flex-wrap gap-x-2 justify-between w-full">
-                        <span>
-                          <span className="font-medium"> Ngày tạo:</span>{" "}
-                          {dayjs(customer.ngaytao).format(
-                            "DD/MM/YYYY HH:mm:ss"
-                          )}
-                        </span>
-
-                        <span>
-                          <span className="font-medium">Người tạo:</span>{" "}
-                          {customer.nguoichidinh}
-                        </span>
-                      </div>
-                      <div className=" text-gray-500 flex flex-wrap gap-x-4 mt-1">
-                        <span className="truncate">
-                          <span className="font-medium">Loại khảo sát:</span>{" "}
-                          {customer.tendanhmuc}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center text-gray-400 mt-32 mb-4 text-sm">
                 Nhập họ tên để bắt đầu làm khảo sát.
               </div>
             )}
+            {/* QR Modal */}
+            <SurveyQRCodeModal
+              visible={qrModal.visible}
+              onClose={() => setQrModal({ visible: false, url: "" })}
+              surveyUrl={qrModal.url}
+            />
           </>
         )}
         {step === 2 && infoCustomer && (
