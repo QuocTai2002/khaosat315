@@ -53,7 +53,7 @@ export default function SurveyPage() {
         );
         setInfoCustomer(data?.phieuKhaoSats);
         if (data?.phieuKhaoSats?.thuchien) {
-          setStep(2); // đã làm khảo sát
+          setStep(2); // đã làm đánh giá
         } else {
           // lấy câu hỏi
           const res = await axios.get(
@@ -116,29 +116,35 @@ export default function SurveyPage() {
     }
   };
 
+  const handleBack = () => {
+    if (surveyIdx > 0) {
+      setSurveyIdx(surveyIdx - 1);
+    }
+  };
+
   if (loading) return <div className="text-center p-8">Đang tải...</div>;
   if (step === 2)
     return (
       <div className="text-center p-8 text-red-500 font-semibold">
-        Khảo sát này đã được hoàn thành hoặc link không còn tồn tại.
+        đánh giá này đã được hoàn thành hoặc link không còn tồn tại.
       </div>
     );
   if (step === 3)
     return (
       <div className="text-center p-8 text-red-500 font-semibold">
-        Không thể tải khảo sát. Vui lòng thử lại sau.
+        Không thể tải đánh giá. Vui lòng thử lại sau.
       </div>
     );
   if (!infoCustomer || !questions.length)
     return (
-      <div className="text-center p-8">Không tìm thấy dữ liệu khảo sát.</div>
+      <div className="text-center p-8">Không tìm thấy dữ liệu đánh giá.</div>
     );
   if (step === 1) return <SurveyComplete onBack={() => {}} />;
 
   return (
     <div className="max-w-xl mx-auto p-2">
       <div className="text-center font-bold text-lg mb-2">
-        Khảo sát: {infoCustomer.danhmuc}
+        đánh giá: {infoCustomer.danhmuc}
       </div>
       <div className="text-center text-base mb-4">
         Khách hàng: {infoCustomer.tenbenhnhan}
@@ -148,6 +154,23 @@ export default function SurveyPage() {
         total={questions.length}
         title={questions[surveyIdx]?.linhvuc?.toString() || ""}
       />
+      {/* Step navigation */}
+      <div className="flex justify-between items-center mb-2 px-2">
+        <button
+          className="text-blue-500 text-sm px-4 py-1 border border-blue-400 rounded-full disabled:opacity-50"
+          onClick={handleBack}
+          disabled={surveyIdx === 0}
+        >
+          Quay lại
+        </button>
+        {/* <span className="text-gray-400 text-xs">Câu {surveyIdx + 1} / {questions.length}</span> */}
+        <button
+          className="text-blue-500 text-sm px-4 py-1 border border-blue-400 rounded-full"
+          onClick={handleNext}
+        >
+          {surveyIdx === questions.length - 1 ? "Hoàn thành & Nộp bài" : "Tiếp theo"}
+        </button>
+      </div>
       <SurveyQuestion
         giaithich={questions[surveyIdx]?.giaithich || false}
         question={questions[surveyIdx]?.noidung || ""}
@@ -158,14 +181,6 @@ export default function SurveyPage() {
         onChange={handleAnswer}
         onExplanationChange={handleExplanationChange}
       />
-      <button
-        className="bg-blue-500 text-white rounded-full px-8 py-2 font-semibold mx-auto mt-4 block"
-        onClick={handleNext}
-      >
-        {surveyIdx === questions.length - 1
-          ? "Hoàn thành & Nộp bài"
-          : "Tiếp tục"}
-      </button>
     </div>
   );
 }

@@ -29,7 +29,7 @@ const SurveyQRCodeModal: React.FC<SurveyQRCodeModalProps> = ({ visible, onClose,
             navigator.clipboard.writeText(surveyUrl);
           }}
         >
-          Sao chép link khảo sát
+          Sao chép link đánh giá
         </Button>
       </div>
     </Modal>

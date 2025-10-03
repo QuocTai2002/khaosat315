@@ -140,7 +140,7 @@ export default function Home() {
         payload
       );
     } catch (error) {
-      console.log("Gửi khảo sát lỗi", error);
+      console.log("Gửi đánh giá lỗi", error);
     }
   };
 
@@ -175,7 +175,7 @@ export default function Home() {
     }
   }, 300);
 
-  // lấy danh sách khảo sát theo iddanhmuc
+  // lấy danh sách đánh giá theo iddanhmuc
   const fetchSurveysByCategory = async (iddanhmuc: number) => {
     try {
       const { data } = await axios.get(
@@ -290,13 +290,13 @@ export default function Home() {
                         </div>
                         <div className=" text-gray-500 flex flex-wrap gap-x-4 mt-1">
                           <span className="truncate">
-                            <span className="font-medium">Loại khảo sát:</span>{" "}
+                            <span className="font-medium">Loại đánh giá:</span>{" "}
                             {customer.tendanhmuc}
                           </span>
                         </div>
                       </div>
                       <div className="flex gap-2 items-center ml-auto mt-2 md:mt-0">
-                        <Tooltip title="Sao chép link khảo sát">
+                        <Tooltip title="Sao chép link đánh giá">
                           <Button
                             icon={<CopyOutlined />}
                             size="small"
@@ -305,7 +305,7 @@ export default function Home() {
                             }
                           />
                         </Tooltip>
-                        <Tooltip title="Mã QR khảo sát">
+                        <Tooltip title="Mã QR đánh giá">
                           <Button
                             icon={<QrcodeOutlined />}
                             size="small"
@@ -321,7 +321,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="text-center text-gray-400 mt-32 mb-4 text-sm">
-                Nhập họ tên để bắt đầu làm khảo sát.
+                Nhập họ tên để bắt đầu làm đánh giá.
               </div>
             )}
             {/* QR Modal */}

@@ -17,7 +17,7 @@ export default function SurveyComplete({ onBack }: SurveyCompleteProps) {
           </svg>
         </span>
       </div>
-      <div className="text-blue-600 text-lg font-semibold mb-6">Cảm ơn bạn đã tham gia khảo sát!</div>
+      <div className="text-blue-600 text-lg font-semibold mb-6">Cảm ơn bạn đã tham gia đánh giá!</div>
       <button
         className="bg-blue-500 text-white px-8 py-2 rounded-full font-semibold hover:bg-blue-600 transition"
         onClick={onBack}
