@@ -164,12 +164,14 @@ export default function SurveyPage() {
           Quay lại
         </button>
         {/* <span className="text-gray-400 text-xs">Câu {surveyIdx + 1} / {questions.length}</span> */}
-        <button
+        {/* <button
           className="text-blue-500 text-sm px-4 py-1 border border-blue-400 rounded-full"
           onClick={handleNext}
         >
-          {surveyIdx === questions.length - 1 ? "Hoàn thành & Nộp bài" : "Tiếp theo"}
-        </button>
+          {surveyIdx === questions.length - 1
+            ? "Hoàn thành & Nộp bài"
+            : "Tiếp theo"}
+        </button> */}
       </div>
       <SurveyQuestion
         giaithich={questions[surveyIdx]?.giaithich || false}
@@ -181,6 +183,16 @@ export default function SurveyPage() {
         onChange={handleAnswer}
         onExplanationChange={handleExplanationChange}
       />
+      <div className="flex justify-center items-center mt-4 px-2 w-full ">
+        <button
+          className="text-white text-sm px-4 py-1 border bg-blue-500  rounded-full"
+          onClick={handleNext}
+        >
+          {surveyIdx === questions.length - 1
+            ? "Hoàn thành & Nộp bài"
+            : "Tiếp theo"}
+        </button>
+      </div>
     </div>
   );
 }
