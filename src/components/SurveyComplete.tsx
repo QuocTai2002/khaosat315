@@ -5,8 +5,39 @@ interface SurveyCompleteProps {
 }
 
 export default function SurveyComplete({ onBack }: SurveyCompleteProps) {
+  React.useEffect(() => {
+    // Chặn phím PrintScreen
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "PrintScreen") {
+        e.preventDefault();
+        alert("Không được phép chụp màn hình!");
+      }
+    };
+    // Chặn context menu (chuột phải)
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      alert("Không được phép sử dụng chuột phải!");
+    };
+    // Chặn copy, cut, paste
+    const handleCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      alert("Không được phép sao chép nội dung!");
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("copy", handleCopy);
+    document.addEventListener("cut", handleCopy);
+    document.addEventListener("paste", handleCopy);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("copy", handleCopy);
+      document.removeEventListener("cut", handleCopy);
+      document.removeEventListener("paste", handleCopy);
+    };
+  }, []);
   return (
-    <div className="flex flex-col items-center justify-center h-full py-20">
+    <div className="flex flex-col items-center justify-center h-full py-20 select-none" style={{ userSelect: "none" }}>
       <div className="text-orange-500 text-3xl font-bold mb-4">Hoàn thành</div>
       <div className="mb-8">
         <span className="inline-block bg-yellow-100 rounded-full p-6">

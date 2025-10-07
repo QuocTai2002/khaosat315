@@ -7,6 +7,37 @@ import SurveyProgress from "@/components/SurveyProgress";
 import SurveyComplete from "@/components/SurveyComplete";
 
 export default function SurveyPage() {
+  React.useEffect(() => {
+    // Chặn phím PrintScreen
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "PrintScreen") {
+        e.preventDefault();
+        alert("Không được phép chụp màn hình!");
+      }
+    };
+    // Chặn context menu (chuột phải)
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      alert("Không được phép sử dụng chuột phải!");
+    };
+    // Chặn copy, cut, paste
+    const handleCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      alert("Không được phép sao chép nội dung!");
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("copy", handleCopy);
+    document.addEventListener("cut", handleCopy);
+    document.addEventListener("paste", handleCopy);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("copy", handleCopy);
+      document.removeEventListener("cut", handleCopy);
+      document.removeEventListener("paste", handleCopy);
+    };
+  }, []);
   const { idphieu } = useParams();
   type InfoCustomer = {
     idphieu: number;
@@ -122,6 +153,38 @@ export default function SurveyPage() {
     }
   };
 
+  React.useEffect(() => {
+    // Chặn phím PrintScreen
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "PrintScreen") {
+        e.preventDefault();
+        alert("Không được phép chụp màn hình!");
+      }
+    };
+    // Chặn context menu (chuột phải)
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      alert("Không được phép sử dụng chuột phải!");
+    };
+    // Chặn copy, cut, paste
+    const handleCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      alert("Không được phép sao chép nội dung!");
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("copy", handleCopy);
+    document.addEventListener("cut", handleCopy);
+    document.addEventListener("paste", handleCopy);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("copy", handleCopy);
+      document.removeEventListener("cut", handleCopy);
+      document.removeEventListener("paste", handleCopy);
+    };
+  }, []);
+
   if (loading) return <div className="text-center p-8">Đang tải...</div>;
   if (step === 2)
     return (
@@ -140,9 +203,8 @@ export default function SurveyPage() {
       <div className="text-center p-8">Không tìm thấy dữ liệu đánh giá.</div>
     );
   if (step === 1) return <SurveyComplete onBack={() => {}} />;
-
   return (
-    <div className="max-w-xl mx-auto p-2">
+    <div className="max-w-xl mx-auto p-2 select-none" style={{ userSelect: "none" }}>
       <div className="text-center font-bold text-lg mb-2">
         đánh giá: {infoCustomer.danhmuc}
       </div>
