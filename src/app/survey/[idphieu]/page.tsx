@@ -80,7 +80,7 @@ export default function SurveyPage() {
       setLoading(true);
       try {
         const { data } = await axios.get(
-          `https://api2.315healthcare.com/api/PhieuKhaoSat/GetByIdPhieuKhaoSat/${idphieu}`
+          `https://api.315healthcare.com/api/PhieuKhaoSat/GetByIdPhieuKhaoSat/${idphieu}`
         );
         setInfoCustomer(data?.phieuKhaoSats);
         if (data?.phieuKhaoSats?.thuchien) {
@@ -88,7 +88,7 @@ export default function SurveyPage() {
         } else {
           // lấy câu hỏi
           const res = await axios.get(
-            `https://api2.315healthcare.com/api/CauHoiKhaoSat/GetByCondition?idDanhMuc=${data?.phieuKhaoSats?.iddanhmuc}`
+            `https://api.315healthcare.com/api/CauHoiKhaoSat/GetByCondition?idDanhMuc=${data?.phieuKhaoSats?.iddanhmuc}`
           );
           setQuestions(res.data);
         }
@@ -137,7 +137,7 @@ export default function SurveyPage() {
       };
       try {
         await axios.post(
-          "https://api2.315healthcare.com/api/PhieuKhaoSat",
+          "https://api.315healthcare.com/api/PhieuKhaoSat",
           payload
         );
         setStep(1);

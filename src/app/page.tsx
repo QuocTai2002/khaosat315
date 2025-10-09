@@ -103,7 +103,7 @@ export default function Home() {
   const fetchBranchList = async () => {
     try {
       const { data } = await axios.get(
-        `https://api2.315healthcare.com/api/KTNhanSuCo/GetChiNhanhBaoHong`
+        `https://api.315healthcare.com/api/KTNhanSuCo/GetChiNhanhBaoHong`
       );
       setBranchList(data);
     } catch (error) {
@@ -136,7 +136,7 @@ export default function Home() {
     };
     try {
       await axios.post(
-        "https://api2.315healthcare.com/api/PhieuKhaoSat",
+        "https://api.315healthcare.com/api/PhieuKhaoSat",
         payload
       );
     } catch (error) {
@@ -164,7 +164,7 @@ export default function Home() {
   // Update: searchCustomers now accepts branch and keyword
   const searchCustomers = debounce(async (branch: number, keyword: string) => {
     try {
-      let url = `https://api2.315healthcare.com/api/PhieuKhaoSat/BenhNhanChoKhaoSat?idChiNhanh=${branch}`;
+      let url = `https://api.315healthcare.com/api/PhieuKhaoSat/BenhNhanChoKhaoSat?idChiNhanh=${branch}`;
       if (keyword && keyword.trim() !== "") {
         url += `&keyword=${encodeURIComponent(keyword.trim())}`;
       }
@@ -179,7 +179,7 @@ export default function Home() {
   const fetchSurveysByCategory = async (iddanhmuc: number) => {
     try {
       const { data } = await axios.get(
-        `https://api2.315healthcare.com/api/CauHoiKhaoSat/GetByCondition?idDanhMuc=${iddanhmuc}`
+        `https://api.315healthcare.com/api/CauHoiKhaoSat/GetByCondition?idDanhMuc=${iddanhmuc}`
       );
       setQuestions(data);
     } catch (error) {
