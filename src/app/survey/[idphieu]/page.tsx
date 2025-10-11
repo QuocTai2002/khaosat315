@@ -137,7 +137,7 @@ export default function SurveyPage() {
       };
       try {
         await axios.post(
-          "https://api.315healthcare.com/api/PhieuKhaoSat",
+          "https://api2.315healthcare.com/api/PhieuKhaoSat",
           payload
         );
         setStep(1);

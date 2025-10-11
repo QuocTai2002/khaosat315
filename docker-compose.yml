@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  nextjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9886:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - web
+
+  # Tùy chọn: Thêm database nếu cần
+  # postgres:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_DB: your_db
+  #     POSTGRES_USER: your_user
+  #     POSTGRES_PASSWORD: your_password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - web
+
+networks:
+  web:
+    external: false
+
+# volumes:
+#   postgres_data:

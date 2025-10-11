@@ -1,0 +1,16 @@
+[Unit]
+Description=Survey Next.js App
+After=network.target
+
+[Service]
+Type=simple
+User=nodejs
+WorkingDirectory=/var/www/survey-app
+Environment=NODE_ENV=production
+Environment=PORT=9886
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

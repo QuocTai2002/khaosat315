@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["filemeta.315healthcare.com"],
   },
+  output: "standalone", // Bật cho Docker deployment
 };
 
 export default nextConfig;
